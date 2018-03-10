@@ -43,6 +43,14 @@ func TestG1Marshal(t *testing.T) {
 	}
 }
 
+func TestG1HashToPoint(t *testing.T) {
+	e := &G1{}
+	e.HashToPoint([]byte("hello"))
+	if !e.p.IsOnCurve() {
+		t.Fatal("hashed point not on curve")
+	}
+}
+
 func TestG2(t *testing.T) {
 	k, Ga, err := RandomG2(rand.Reader)
 	if err != nil {

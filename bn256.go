@@ -51,6 +51,26 @@ func (g *G1) String() string {
 	return "bn256.G1" + g.p.String()
 }
 
+// HashToPoint finds nearest point corresponding to m. CAREFUL: Is NOT constant
+// time.
+func (e *G1) HashToPoint(m []byte) *G1 {
+	if e.p == nil {
+		e.p = &curvePoint{}
+	}
+
+	x, y := hashToCurvePoint(m)
+	var pad [32]byte
+	e.p.x.Unmarshal(append(x.Bytes(), pad[:]...))
+	e.p.y.Unmarshal(append(y.Bytes(), pad[:]...))
+	montEncode(&e.p.x, &e.p.x)
+	montEncode(&e.p.y, &e.p.y)
+
+	// Implicit affine
+	e.p.z = *newGFp(1)
+	e.p.t = gfP{0}
+	return e
+}
+
 // ScalarBaseMult sets e to g*k where g is the generator of the group and then
 // returns e.
 func (e *G1) ScalarBaseMult(k *big.Int) *G1 {
